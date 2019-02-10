@@ -7,10 +7,7 @@ from thread import *
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
 server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) 
   
-# takes the first argument from command prompt as IP address 
 IP_address = 'localhost'
-  
-# takes second argument from command prompt as port number 
 Port = 5000 
 server.bind((IP_address, Port)) 
 server.listen(100) 
@@ -19,7 +16,6 @@ list_of_clients = []
   
 def clientthread(conn, addr): 
   
-    # sends a message to the client whose user object is conn 
     conn.send("Welcome to this chatroom!") 
   
     while True: 

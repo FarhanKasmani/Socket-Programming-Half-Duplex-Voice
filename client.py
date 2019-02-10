@@ -1,5 +1,3 @@
-
-# Python program to implement client side of chat room. 
 import socket 
 import select 
 import sys 
@@ -14,7 +12,7 @@ server.connect((IP_address, Port))
 CHUNK = 1024
 FORMAT = pyaudio.paInt16
 CHANNELS = 1
-RATE = 4410
+RATE = 44100
 RECORD_SECONDS = 40
 WIDTH = 2
 
@@ -32,47 +30,32 @@ stream_output = p.open(format=p.get_format_from_width(WIDTH),
                 output=True,
                 frames_per_buffer=CHUNK)
 
-  
+frames_input = []
+frames_output = []
+
+def send():
+	data  = stream_input.read(CHUNK)
+	frames_input.append(data)
+	server.sendall(data)	
+
+def receive(read_sockets):
+
+	for socks in read_sockets: 
+		if socks == server: 
+			data = socks.recv(1024) 
+			stream_output.write(data)
+			frames_output.append(data)
+			print("Recieved message: ")
+			print(data)
+ 
 while True: 
-  
-    # maintains a list of possible input streams 
-    sockets_list = [sys.stdin, server] 
-  
-    """ There are two possible input situations. Either the 
-    user wants to give  manual input to send to other people, 
-    or the server is sending a message  to be printed on the 
-    screen. Select returns from sockets_list, the stream that 
-    is reader for input. So for example, if the server wants 
-    to send a message, then the if condition will hold true 
-    below.If the user wants to send a message, the else 
-    condition will evaluate as true"""
-    read_sockets,write_socket, error_socket = select.select(sockets_list,[],[]) 
-  
-    frames_input = []
-    frames_output = []
+   
+    sockets_list = [sys.stdin, server]
 
-    for i in range(0, int(RATE/CHUNK*RECORD_SECONDS)):
-        data  = stream_input.read(CHUNK)
-        frames_input.append(data)
-        server.sendall(data)
+    read_sockets,write_socket, error_socket = select.select(sockets_list,[],[])
+    receive(read_sockets)
+    
+    # for i in range(0, int(RATE/CHUNK*RECORD_SECONDS)):
+    # 	send()
 
-    # for socks in read_sockets: 
-    #     if socks == server: 
-    #         data = socks.recv(1024) 
-    #         stream_output.write(data)
-    #         frames_output.append(data)
-    #         print("Recieved message: ")
-    #         print(data)
-    #     else: 
-    #         for i in range(0, int(RATE/CHUNK*RECORD_SECONDS)):
-    #             print(i)
-    #             data  = stream_input.read(CHUNK)
-    #             frames_input.append(data)
-    #             server.sendall(data)
-
-            # message = input() 
-            # server.send(message.encode()) 
-            # sys.stdout.write("<You>") 
-            # sys.stdout.write(message) 
-            # sys.stdout.flush() 
 server.close() 
